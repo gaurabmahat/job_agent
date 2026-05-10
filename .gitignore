@@ -1,0 +1,22 @@
+# .gitignore
+
+# Private config — never commit
+.env
+
+# Your personal cover letter template
+templates/
+
+# Generated cover letters
+output/
+
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+job_tracker.xlsx
+
+# Windows junk
+Thumbs.db
+desktop.ini
