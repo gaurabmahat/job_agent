@@ -2,11 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 
-# ─────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 # SYNONYM MAP
 # Expand each word into a group of related terms.
 # Add more as you encounter them.
-# ─────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 SYNONYMS = {
     "developer":  ["developer", "engineer", "programmer"],
     "engineer":   ["engineer", "developer", "programmer"],
@@ -42,7 +42,7 @@ def expand_keywords(keyword: str) -> list:
             # Add all synonyms for this word
             expanded.update(SYNONYMS[word])
         else:
-            # Word not in map — keep it as-is
+            # Word not in map - keep it as-is
             expanded.add(word)
 
     return list(expanded)
@@ -145,7 +145,7 @@ def get_job_listings(keywords: list, base_url: str, max_jobs: int = 5) -> list:
                 if any(j["url"] == full_url for j in all_jobs):
                     continue
 
-                # ✅ Synonym-aware matching
+                # Synonym-aware matching
                 if not title_matches_keyword(title, keyword):
                     continue
 
@@ -174,7 +174,7 @@ def get_job_listings(keywords: list, base_url: str, max_jobs: int = 5) -> list:
                 break
 
         if found == 0:
-            print(f"  ✗ No matches found for '{keyword}' — try a broader keyword")
+            print(f"  ✗ No matches found for '{keyword}' - try a broader keyword")
 
     return all_jobs
 
@@ -187,7 +187,7 @@ if __name__ == "__main__":
 
     jobs = get_job_listings(keywords=keywords, base_url=test_url, max_jobs=5)
 
-    print(f"\n─── FOUND {len(jobs)} MATCHING JOB(S) ───")
+    print(f"\---- FOUND {len(jobs)} MATCHING JOB(S) ------")
     for i, job in enumerate(jobs, 1):
         print(f"\n{i}. {job['title']}")
         print(f"   {job['url']}")

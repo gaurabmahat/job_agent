@@ -1,6 +1,6 @@
 # .gitignore
 
-# Private config — never commit
+# Private config - never commit
 .env
 
 # Your personal cover letter template

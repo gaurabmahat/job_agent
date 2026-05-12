@@ -31,7 +31,7 @@ def scrape_job_page(url: str) -> dict:
     title = title_tag.get_text(strip=True) if title_tag else "Title not found"
 
     # --- Extract job description ---
-    # This is the tricky part — every site uses different class names.
+    # This is the tricky part - every site uses different class names.
     # We try a few common patterns:
     description = ""
 
@@ -53,8 +53,11 @@ def scrape_job_page(url: str) -> dict:
 
     # Fallback: grab all paragraph text if nothing matched
     if not description:
-        paragraphs = soup.find_all("p")
-        description = "\n".join(p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True))
+        print("[INFO] BeautifulSoup found no description - page is likely JS-rendered.")
+        print("[INOF] Falling back to Selenium with Firefox (~10 seconds)...")
+
+        from scraper.dynamic_scraper import scrape_job_page_dynamic
+        return scrape_job_page_dynamic(url)
 
     return {
         "title": title,
@@ -63,7 +66,7 @@ def scrape_job_page(url: str) -> dict:
     }
 
 
-# Quick test — run this file directly to try it
+# Quick test - run this file directly to try it
 if __name__ == "__main__":
     test_url = input("Paste a job listing URL to test: ").strip()
     result = scrape_job_page(test_url)

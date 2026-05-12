@@ -1,19 +1,18 @@
 import ollama
-from config import OLLAMA_MODEL, YOUR_SKILLS
+from config import OLLAMA_MODEL, YOUR_SKILLS, YOUR_BACKGROUND
 
 def generate_cover_letter_sections(
     job_title: str,
     job_description: str,
     company_name: str,
-    your_background: str,
 ) -> dict:
     """
     Generates two targeted sections:
-    1. A skills match sentence — mirrors job requirements with candidate's real skills
-    2. A company paragraph — explains genuine interest in this specific role
+    1. A skills match sentence - mirrors job requirements with candidate's real skills
+    2. A company paragraph - explains genuine interest in this specific role
     """
 
-    # ── Skills match ────────────────────────────────────────────────────────────
+    # -- Skills match --------------------------------------------------------------------------------
 
     print(f"[AI] Matching your skills to job requirements...")
 
@@ -24,7 +23,7 @@ def generate_cover_letter_sections(
         Company: {company_name}
         Job Description: {job_description[:1000]}
 
-        Candidate's actual skills (only use skills from this list — never invent skills):
+        Candidate's actual skills (only use skills from this list - never invent skills):
         {YOUR_SKILLS}
 
         Write ONE sentence (max 45 words) that:
@@ -35,16 +34,16 @@ def generate_cover_letter_sections(
         - Varies the opening freely
 
         Here are example STYLES to draw from (do not copy these, just use them
-        as inspiration for tone and structure — write something fresh each time):
+        as inspiration for tone and structure - write something fresh each time):
         * "My hands-on work with React and TypeScript maps closely to..."
         * "Having built RESTful APIs and worked with Azure DevOps daily, I'm well placed to..."
-        * "The stack you're working with — NodeJS, React, and AWS — closely mirrors..."
+        * "The stack you're working with - NodeJS, React, and AWS - closely mirrors..."
         * "Working with {company_name}'s tech stack would feel familiar from day one, given my..."
 
         Output only the sentence, nothing else. No explanation, no preamble.
     """
 
-    # ── Company paragraph ────────────────────────────────────────────────────────
+    # -- Company paragraph --------------------------------------------------------------------------------
 
     print(f"[AI] Writing company paragraph for {company_name}...")
 
@@ -56,7 +55,7 @@ def generate_cover_letter_sections(
         Job Description: {job_description[:1000]}
 
         Candidate background summary:
-        {your_background}
+        {YOUR_BACKGROUND}
 
         Write ONE paragraph (3-4 sentences) that:
         - Explains why the candidate is genuinely interested in THIS specific role and company
@@ -68,7 +67,7 @@ def generate_cover_letter_sections(
         - Varies the opening freely
 
         Here are example OPENING STYLES to inspire variety
-        (do not copy these — write something fresh and specific each time):
+        (do not copy these - write something fresh and specific each time):
         * "The opportunity to work on [specific thing from job description]..."
         * "{company_name}'s focus on [something from job description] is what caught my attention..."
         * "Having worked in [relevant context], I find {company_name}'s approach to [X] particularly compelling..."
@@ -78,7 +77,7 @@ def generate_cover_letter_sections(
         Output only the paragraph text, nothing else.
     """
 
-    # ── Call Ollama ──────────────────────────────────────────────────────────────
+    # -- Call Ollama --------------------------------------------------------------------------------
 
     def ask_ollama(prompt: str, label: str) -> str:
         try:
@@ -95,7 +94,7 @@ def generate_cover_letter_sections(
     skills_sentence = ask_ollama(skills_prompt, "skills match")
     company_paragraph = ask_ollama(company_prompt, "company paragraph")
 
-    # ── Fallbacks if Ollama fails ────────────────────────────────────────────────
+    # -- Fallbacks if Ollama fails --------------------------------------------------------------------------------
 
     if not skills_sentence:
         skills_sentence = (

@@ -1,5 +1,5 @@
 # COVER LETTER TEMPLATE GUIDE
-# ════════════════════════════════════════════════════════════════
+# --------------------------------------------------------------------------------
 #
 # HOW TO USE THIS FILE:
 #   1. Create a new file called "cover_letter.docx" in the templates/ folder
@@ -8,7 +8,7 @@
 #   4. The tool will automatically replace placeholders when generating
 #
 # PLACEHOLDERS (copy these exactly into your Word document):
-# ────────────────────────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 #
 #   {{JOB_TITLE}}             → Replaced with the job title from the listing
 #   {{COMPANY_NAME}}          → Replaced with the company name you confirm
@@ -16,22 +16,22 @@
 #   {{COMPANY_PARAGRAPH}}     → AI writes a paragraph about why you want this role
 #
 # IMPORTANT RULES:
-# ────────────────────────────────────────────────────────────────
-#   - Spell placeholders exactly — no extra spaces, no single braces
+# --------------------------------------------------------------------------------
+#   - Spell placeholders exactly - no extra spaces, no single braces
 #   - Each placeholder should be on its own line/paragraph in Word
 #   - Keep the rest of the letter as your own fixed text
 #   - Save the file as cover_letter.docx (not .doc or .txt)
 #
-# ════════════════════════════════════════════════════════════════
+# --------------------------------------------------------------------------------
 # EXAMPLE TEMPLATE STRUCTURE (recreate this in your Word document)
-# ════════════════════════════════════════════════════════════════
+# --------------------------------------------------------------------------------
 
 Hi,
 
-[Add an opening sentence.] {{JOB_TITLE}} {{COMPANY_NAME}}. [Keep your own opening sentence here — describe your
+[Add an opening sentence.] {{JOB_TITLE}} {{COMPANY_NAME}}. [Keep your own opening sentence here - describe your
 background briefly and what you bring to the role.]
 
-[YOUR FIXED PARAGRAPH — e.g. your work experience bullets. This never changes.
+[YOUR FIXED PARAGRAPH - e.g. your work experience bullets. This never changes.
 The tool will keep this exactly as you write it.]
 
 {{SKILLS_MATCH_SENTENCE}}

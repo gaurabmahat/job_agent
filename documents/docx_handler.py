@@ -62,7 +62,7 @@ def save_cover_letter(doc: Document, job_title: str, company_name: str, output_d
     # Build a clean filename: "CoverLetter_COMPANY_SoftwareDeveloper_2025-01-15.docx"
     clean_title = job_title.replace(" ", "_").replace("/", "-")[:30]  # limit length
     clean_company = company_name.replace(" ", "_")[:20]
-    # Timestamp with seconds — guarantees a unique filename every run
+    # Timestamp with seconds - guarantees a unique filename every run
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     filename = f"CoverLetter_{clean_company}_{clean_title}_{timestamp}.docx"
@@ -72,14 +72,14 @@ def save_cover_letter(doc: Document, job_title: str, company_name: str, output_d
         doc.save(output_path)
         print(f"[SAVED] Cover letter saved to: {output_path}")
     except PermissionError:
-        print(f"\n[ERROR] Could not save — the file is open in Word.")
+        print(f"\n[ERROR] Could not save - the file is open in Word.")
         print(f"[FIX]   Close the file in Word and press Enter to try again...")
         input()  # Wait for user to close Word
         try:
             doc.save(output_path)
             print(f"[SAVED] Saved successfully: {output_path}")
         except PermissionError:
-            # Last resort — add extra timestamp to avoid any conflict
+            # Last resort - add extra timestamp to avoid any conflict
             fallback_path = output_path.replace(".docx", "_v2.docx")
             doc.save(fallback_path)
             print(f"[SAVED] Saved as fallback: {fallback_path}")

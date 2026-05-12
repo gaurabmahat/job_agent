@@ -1,12 +1,12 @@
-# main.py — The entry point that wires everything together
+# main.py - The entry point that wires everything together
 # Run with: python main.py
 
 import sys
 import os
 
-# ─────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 # Make sure Python can find all our modules
-# ─────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from scraper.listing_scraper import get_job_listings
@@ -19,7 +19,6 @@ from config import (
     OUTPUT_DIR,
     JOB_KEYWORDS,
     MAX_JOBS_PER_KEYWORD,
-    YOUR_BACKGROUND,
     YOUR_NAME,
 )
 
@@ -33,26 +32,26 @@ def ask_required(prompt: str, field_name: str) -> str:
             return value
         print(f"[!] {field_name} cannot be empty. Please try again.")
 
-# ─────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 # HELPERS
-# ─────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 
 def print_banner():
     print("""
-╔══════════════════════════════════════════════╗
-║        AI Job Application Agent             ║
-║        Running 100% locally with Ollama     ║
-╚══════════════════════════════════════════════╝
+=================================================
+||        AI Job Application Agent             ||
+||        Running 100% locally with Ollama     ||
+=================================================
     """)
 
 def ask_company_name(suggested: str = "") -> str:
     """Ask the user to confirm or enter the company name."""
     if suggested:
         answer = input(f"\nCompany name detected as '{suggested}'. Press Enter to confirm or type a new name: ").strip()
-        # If they just hit Enter, use the suggestion — that's valid
+        # If they just hit Enter, use the suggestion - that's valid
         return answer if answer else suggested
 
-    # No suggestion — must type something
+    # No suggestion - must type something
     return ask_required("Enter the company name: ", "Company name")
 
 def pick_job_from_list(jobs: list) -> dict | None:
@@ -61,9 +60,9 @@ def pick_job_from_list(jobs: list) -> dict | None:
         print("\n[!] No matching jobs found. Try different keywords.")
         return None
 
-    print(f"\n{'─'*50}")
+    print(f"\n{'--'*50}")
     print(f"  Found {len(jobs)} matching job(s):")
-    print(f"{'─'*50}")
+    print(f"{'--'*50}")
 
     for i, job in enumerate(jobs, 1):
         print(f"  {i}. {job['title']}")
@@ -95,10 +94,10 @@ def extract_company_from_url(url: str) -> str:
         return ""
 
 def get_job_details_manually() -> dict:
-    print("\n── MANUAL JOB INPUT ──────────────────────────")
-    print("─────────────────────────────────────────────\n")
+    print("\n-- MANUAL JOB INPUT -----------------")
+    print("--------------------------------------------------------------------------------\n")
 
-    # Both required — will keep asking if empty
+    # Both required - will keep asking if empty
     job_title = ask_required("Job title (copy from the listing): ", "Job title")
     company_name = ask_required("Company name: ", "Company name")
 
@@ -153,7 +152,7 @@ def run_full_pipeline_from_data(job_data: dict, company_name: str):
     print(f"  ✓ Title: {job_title}")
     print(f"  ✓ Description: {len(job_description)} characters")
 
-    # ── Let user confirm or edit the job title ───────────────────
+    # -- Let user confirm or edit the job title -------------------
     print()
     print()
     edited_title = input(
@@ -166,9 +165,9 @@ def run_full_pipeline_from_data(job_data: dict, company_name: str):
         print(f"  ✓ Using: '{job_title}'")
 
     if not job_description:
-        print("[WARNING] Description is empty — cover letter may be generic.")
+        print("[WARNING] Description is empty - cover letter may be generic.")
 
-    # ── Step 2: AI generation ──────────────────────────
+    # -- Step 2: AI generation ----------------------------------------------
     print(f"\n[2/4] Generating cover letter with Ollama (~20-40 seconds)...")
 
     try:
@@ -176,14 +175,13 @@ def run_full_pipeline_from_data(job_data: dict, company_name: str):
             job_title=job_title,
             job_description=job_description,
             company_name=company_name,
-            your_background=YOUR_BACKGROUND,
         )
     except Exception as e:
         print(f"\n[ERROR] Ollama failed: {e}")
         print("[HINT] Run 'ollama serve' in a separate terminal.")
         return
 
-    # ── Step 3: Fill template ──────────────────────────
+    # -- Step 3: Fill template ----------------------------
     print(f"\n[3/4] Filling your cover letter template...")
 
     try:
@@ -195,7 +193,7 @@ def run_full_pipeline_from_data(job_data: dict, company_name: str):
 
     filled_doc = replace_placeholders(doc, replacements)
 
-    # ── Step 4: Save ───────────────────────────────────
+    # -- Step 4: Save ----------------------
     print(f"\n[4/4] Saving cover letter...")
     output_path = save_cover_letter(filled_doc, job_title, company_name, OUTPUT_DIR)
 
@@ -208,12 +206,12 @@ def run_full_pipeline_from_data(job_data: dict, company_name: str):
         {'═'*50}
     """)
 
-    print("\n── SKILLS MATCH ──")
+    print("\n-- SKILLS MATCH --")
     print(replacements.get("{{SKILLS_MATCH_SENTENCE}}", ""))
-    print("\n── COMPANY PARAGRAPH ──")
+    print("\n-- COMPANY PARAGRAPH --")
     print(replacements.get("{{COMPANY_PARAGRAPH}}", ""))
 
-    # ── Tracker prompt ─────────────────────────────────────────
+    # -- Tracker prompt ----------------------------------------------
     print()
     log_it = input("Log this application to your job tracker? (y/n): ").strip().lower()
 
@@ -226,11 +224,11 @@ def run_full_pipeline_from_data(job_data: dict, company_name: str):
         if success:
             show_tracker_summary()
     else:
-        print("[TRACKER] Skipped — you can log it manually later.")
+        print("[TRACKER] Skipped - you can log it manually later.")
 
-# ─────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 # MAIN MENU
-# ─────────────────────────────────────────────
+# --------------------------------------------------------------------------------
 
 def main():
     print_banner()
@@ -246,13 +244,13 @@ def main():
 
     choice = input("\nEnter 1, 2, 3 or 4: ").strip()
 
-    # ── Option 1: Keyword search ─────────────────────
+    # -- Option 1: Keyword search ----------------------------------------------
     if choice == "1":
         print(f"\n[INFO] Searching with keywords from config.py: {JOB_KEYWORDS}")
         custom = input("Press Enter to use these, or type your own (comma separated): ").strip()
         keywords = [k.strip() for k in custom.split(",")] if custom else JOB_KEYWORDS
 
-        # ✅ Listing URL is required
+        # Listing URL is required
         target_url = ask_required("\nPaste the careers listing page URL: ", "Careers page URL")
 
         jobs = get_job_listings(
@@ -260,6 +258,18 @@ def main():
             base_url=target_url,
             max_jobs=MAX_JOBS_PER_KEYWORD
         )
+
+        if not jobs:
+            print("\n[INFO] No jobs found with static scraper.")
+            use_selenium = input("Try again with Firefox/Selenium? (y/n): ").strip().lower()
+
+            if use_selenium == "y":
+                from scraper.dynamic_scraper import scrape_listing_page_dynamic
+                jobs = scrape_listing_page_dynamic(
+                    base_url=target_url,
+                    keywords=keywords,
+                    max_jobs=MAX_JOBS_PER_KEYWORD
+                )
 
         selected_job = pick_job_from_list(jobs)
         if not selected_job:
@@ -271,7 +281,7 @@ def main():
 
         run_full_pipeline(selected_job["url"], company_name)
 
-    # ── Option 2: Direct URL ─────────────────────────
+    # -- Option 2: Direct URL -------------------------------
     elif choice == "2":
         # URL is required
         job_url = ask_required("\nPaste the job listing URL: ", "Job URL")
@@ -281,7 +291,7 @@ def main():
 
         run_full_pipeline(job_url, company_name)
     
-    # ── Option 3: Enter job description manually ─────────────────────────
+    # -- Option 3: Enter job description manually -------------------
     elif choice == "3":
         job_data = get_job_details_manually()
 
@@ -290,7 +300,7 @@ def main():
             company_name=job_data["company"]
         )
 
-    # ── Option 4: Exit ───────────────────────────────
+    # -- Option 4: Exit ------------------------
     elif choice == "4":
         print("Goodbye!")
 

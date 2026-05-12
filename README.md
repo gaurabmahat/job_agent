@@ -30,10 +30,10 @@ A local Python tool that scrapes job listings, matches them to your skills, gene
 ## Demo
 
 ```
-╔══════════════════════════════════════════════╗
-║        AI Job Application Agent              ║
-║        Running 100% locally with Ollama      ║
-╚══════════════════════════════════════════════╝
+=================================================
+||        AI Job Application Agent             ||
+||        Running 100% locally with Ollama     ||
+=================================================
 
     Logged in as: {user_name}
 
@@ -64,12 +64,12 @@ Press Enter to confirm or type a new job title: Software Developer
 [3/4] Filling your cover letter template...
 [4/4] Saving cover letter...
 
-══════════════════════════════════════════════════
+=====================================================
   ✅ Cover letter ready!
   📄 File: output/CoverLetter_company_Software_Developer_date.docx
   🏢 Company: company
   💼 Role: Software Developer
-══════════════════════════════════════════════════
+=====================================================
 
 Log this application to your job tracker? (y/n): y
 [TRACKER] Saved to tracker: job_tracker.xlsx
@@ -99,30 +99,30 @@ Log this application to your job tracker? (y/n): y
 ```
 User input (URL, keywords, or manual paste)
                 ↓
-    ┌───────────────────────────┐
-    │   listing_scraper.py      │  Finds matching job URLs from a careers page
-    │                           │  Synonym expansion + role blocklist filtering
-    └───────────────────────────┘
+    ┌---------------------------┐
+    |   listing_scraper.py      |  Finds matching job URLs from a careers page
+    |                           |  Synonym expansion + role blocklist filtering
+    └---------------------------┘
                 ↓
-    ┌───────────────────────────┐
-    │   static_scraper.py       │  Extracts job title + description from a page
-    └───────────────────────────┘
+    ┌---------------------------┐
+    |   static_scraper.py       |  Extracts job title + description from a page
+    └---------------------------┘
                 ↓
-    ┌───────────────────────────┐
-    │   cover_letter_gen.py     │  Sends job data to local Ollama LLM
-    │   (Ollama + Llama 3.2)    │  Returns two tailored paragraphs
-    └───────────────────────────┘
+    ┌---------------------------┐
+    |   cover_letter_gen.py     |  Sends job data to local Ollama LLM
+    |   (Ollama + Llama 3.2)    |  Returns two tailored paragraphs
+    └---------------------------┘
                 ↓
-    ┌───────────────────────────┐
-    │   docx_handler.py         │  Reads your .docx template
-    │                           │  Replaces {{PLACEHOLDERS}} with content
-    │                           │  Saves to output/ 
-    └───────────────────────────┘
+    ┌---------------------------┐
+    |   docx_handler.py         |  Reads your .docx template
+    |                           |  Replaces {{PLACEHOLDERS}} with content
+    |                           |  Saves to output/ 
+    └---------------------------┘
                 ↓
-    ┌───────────────────────────┐
-    │   job_tracker.py          │  Logs application to Excel
-    │   (optional)              │  
-    └───────────────────────────┘
+    ┌---------------------------┐
+    |   job_tracker.py          |  Logs application to Excel
+    |   (optional)              |  
+    └---------------------------┘
                 ↓
         output/CoverLetter_Company_Role_Date.docx
         job_tracker.xlsx  (if you chose to log it)
@@ -287,9 +287,9 @@ Paste the careers listing page URL: https://careers.company.com/en/find-jobs/
 [SEARCHING] Keyword: 'react developer'
 [EXPANDED]  Matching against: ['react', 'reactjs', 'developer', 'engineer', ...]
 
-──────────────────────────────────────────────────
+--------------------------------------------------------------------------------
   Found 2 matching job(s):
-──────────────────────────────────────────────────
+--------------------------------------------------------------------------------
   1. Software Developer (NodeJS, React, TypeScript)
      https://careers.company.com/en/find-jobs/r0625/...
 
@@ -317,7 +317,7 @@ Press Enter to confirm or type a new job title: Software Developer
 ```
 Enter 1, 2, 3 or 4: 3
 
-── MANUAL JOB INPUT ──────────────────────────
+-- MANUAL JOB INPUT -------------------------------------
 Job title (copy from the listing): Software Developer
 Company name: Company
 

@@ -7,7 +7,7 @@ from openpyxl.utils import get_column_letter
 
 TRACKER_PATH = "job_tracker.xlsx"
 
-# ── Column definitions ───────────────────────────────────────────
+# -- Column definitions ------------------------------------------------
 COLUMNS = ["Company", "Job Role", "Job Description", "Applied Date"]
 
 # Column widths (in Excel units)
@@ -20,7 +20,7 @@ COLUMN_WIDTHS = {
 
 
 def _style_header_row(sheet):
-    """Applies header styling — dark background, white bold text."""
+    """Applies header styling - dark background, white bold text."""
     header_fill = PatternFill("solid", start_color="2D3748")
     header_font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
 
@@ -90,19 +90,19 @@ def save_to_tracker(
     today = datetime.now().strftime("%Y-%m-%d")
 
     try:
-        # ── Load existing or create new ─────────────────────────
+        # -- Load existing or create new ------------------------------------------
         if os.path.exists(tracker_path):
             wb = load_workbook(tracker_path)
             sheet = wb.active
         else:
-            print(f"[TRACKER] No tracker found — creating new file: {tracker_path}")
+            print(f"[TRACKER] No tracker found - creating new file: {tracker_path}")
             wb = _create_new_tracker()
             sheet = wb.active
 
-        # ── Find the next empty row ──────────────────────────────
+        # -- Find the next empty row ------------------------------------------------
         next_row = sheet.max_row + 1
 
-        # ── Write the data ───────────────────────────────────────
+        # -- Write the data ---------------------------------------------------------
         trimmed_description = job_description[:1000].strip()
         if len(job_description) > 1000:
             trimmed_description += "... [trimmed]"
@@ -112,11 +112,11 @@ def save_to_tracker(
         for col_num, value in enumerate(row_data, start=1):
             sheet.cell(row=next_row, column=col_num, value=value)
 
-        # ── Style the new row ────────────────────────────────────
+        # -- Style the new row -------------------------------------------------------
         _style_data_row(sheet, next_row)
         sheet.row_dimensions[next_row].height = 60
 
-        # ── Save with retry loop ─────────────────────────────────
+        # -- Save with retry loop -----------------------------------------------------
         while True:
             try:
                 wb.save(tracker_path)
@@ -124,7 +124,7 @@ def save_to_tracker(
                 return True
 
             except PermissionError:
-                print(f"\n[ERROR] Cannot save — {tracker_path} is open in Excel.")
+                print(f"\n[ERROR] Cannot save - {tracker_path} is open in Excel.")
                 print("[FIX]   Close the file in Excel, then press Enter to try again...")
                 input()  # Wait for user to close Excel
 
