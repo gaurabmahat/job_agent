@@ -7,6 +7,7 @@ A local Python tool that scrapes job listings, matches them to your skills, gene
 ![BeautifulSoup](https://img.shields.io/badge/BeautifulSoup4-scraping-green?style=flat)
 ![python-docx](https://img.shields.io/badge/python--docx-Word%20output-blue?style=flat)
 ![openpyxl](https://img.shields.io/badge/openpyxl-Job%20tracker-217346?style=flat)
+![Selenium](https://img.shields.io/badge/Selenium-Firefox-43B02A?style=flat&logo=selenium&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-brightgreen?style=flat)
 
 ---
@@ -56,6 +57,16 @@ Press Enter to confirm or type a new job title: Software Developer
     ✓ Title: Software Developer
     ✓ Description: 2847 characters extracted
 
+[INFO] BeautifulSoup found no description - page is likely JS-rendered.
+[INFO] Falling back to Selenium with Firefox (~10 seconds)...
+
+[SELENIUM] Starting Firefox scraper...
+    ✓ Launching Firefox...
+    ✓ Loading page...
+    ✓ Waiting for page content to render...
+    ✓ Extracting job details...
+    ✓ Firefox closed.
+
 [2/4] Generating cover letter with Ollama (~20-40 seconds)...
 [AI] Matching your skills to job requirements...
 [AI] Writing company paragraph for Company...
@@ -83,12 +94,14 @@ Log this application to your job tracker? (y/n): y
 - **Synonym-aware matching** - "frontend developer" also matches "Frontend Engineer", "UI Developer" and similar titles
 - **Role blocklist** - automatically filters out irrelevant roles
 - **Direct URL scraping** - paste a specific job URL and it extracts the title and description automatically
+- **Automatic Selenium fallback** - if BeautifulSoup finds no description, Firefox takes over
 - **Manual paste fallback** - for sites like LinkedIn that block scrapers, paste the description yourself
 - **Local AI generation** - Ollama + Llama 3.2 writes two tailored paragraphs per application
 - **Hybrid cover letter strategy** - your fixed experience sections stay locked; only job-specific content is AI-generated
 - **Unique timestamped filenames** - every output file has a timestamp to the second, so you never overwrite a previous letter
 - **Word document output** - generates a ready-to-review '.docx' file
 - **Job application tracker** - optionally logs each application to 'job_tracker.xlsx' with company, role, description, and date
+- **CLI spinner** - visual feedback while Selenium and Firefox are working in the background
 - **Zero data leakage** - nothing leaves your machine; no external API calls for generation
 - **Private config** - personal data lives in '.env'
 
@@ -106,6 +119,12 @@ User input (URL, keywords, or manual paste)
                 ↓
     ┌---------------------------┐
     |   static_scraper.py       |  Extracts job title + description from a page
+    |                           |  Auto falls back to Selenium if page is JS-rendered
+    └---------------------------┘
+                ↓ (if JS-rendered)
+    ┌---------------------------┐
+    |   dynamic_scraper.py      |  Launches Firefox via Selenium
+    |   (automatic fallback)    |  Waits for JS to render, then extracts content
     └---------------------------┘
                 ↓
     ┌---------------------------┐
@@ -152,6 +171,7 @@ User input (URL, keywords, or manual paste)
 | [openpyxl](https://openpyxl.readthedocs.io) | Read/write '.xlsx' tracker | Reliable Excel handling with formatting support |
 | [python-dotenv](https://github.com/theskumar/python-dotenv) | Load '.env' config | Keeps personal data out of the codebase |
 | Python 3.10+ | Core language | Standard, cross-platform |
+| [Selenium](https://selenium-python.readthedocs.io) + Firefox | JS-rendered page scraping | Drives a real browser for pages BeautifulSoup can't handle |
 
 ---
 
@@ -160,7 +180,8 @@ User input (URL, keywords, or manual paste)
 ### Prerequisites
 
 - Python 3.10 or higher
-- [Ollama](https://ollama.com) installed on your machine
+- [Ollama](https://ollama.com) installed on the machine
+- [Firefox](https://www.mozilla.org/firefox/) installed on the machine
 - Git
 
 ### Step 1 - Clone the repo
@@ -187,6 +208,8 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
+> GeckoDriver (Firefox's WebDriver) is downloaded automatically on first Selenium run - no need to install it manually.
 
 ### Step 4 - Install and set up Ollama
 
@@ -253,8 +276,11 @@ OLLAMA_MODEL=llama3.2
 # Your skills (used for skills matching)
 YOUR_SKILLS=write your skills here
 
-#Your background 
+# Your background 
 YOUR_BACKGROUND=write your background here
+
+# Browser for Selenium
+SELENIUM_BROWSER=firefox
 
 ```
 
@@ -297,6 +323,20 @@ Paste the careers listing page URL: https://careers.company.com/en/find-jobs/
      https://careers.company.com/en/find-jobs/r0624/...
 
 Enter the number of the job you want to apply for (or 0 to cancel): 1
+```
+
+If the static scraper finds no jobs, you'll be offered a Selenium retry:
+
+```
+[INFO] No jobs found with static scraper.
+Try again with Firefox/Selenium? (y/n): y
+
+[SELENIUM] Loading page with Firefox...
+    ✓ Launching Firefox...
+    ✓ Loading job listing page...
+    ✓ Waiting for job listings to load...
+    ✓ Scanning for matching jobs...
+    ✓ Firefox closed.
 ```
 
 ### Option 2 - Direct job URL
@@ -358,14 +398,15 @@ These are real errors I encountered during development and testing.
 |---|---|---|
 | 'ModuleNotFoundError: No module named 'documents'' | Running a file from inside a subfolder | Always run from the project root: 'python main.py' |
 | 'ConnectionError' from Ollama | Ollama service isn't running | Open a separate terminal and run 'ollama serve' before starting the agent |
-| Empty job description scraped | Site uses JavaScript rendering or unusual CSS classes | Use Option 3 (manual paste) for these sites |
+| Empty job description scraped | Site uses JavaScript rendering or unusual CSS classes | Tool falls back to Selenium automatically - or use Option 3 (manual paste) for these sites |
 | Irrelevant jobs in search results | Keyword too broad (e.g. "engineer" matching "Sales Engineer") | Add the role type to 'BLOCKED_TITLE_WORDS' in 'listing_scraper.py' |
 | Placeholder not replaced in output | Placeholder misspelled in '.docx' template | Check spelling - must be exactly '{{PLACEHOLDER_NAME}}' with double curly braces, no spaces |
 | 'EnvironmentError: Missing required variable' | '.env' file is missing a required key | Open '.env' and add the missing variable - the error message tells you which one |
 | 'FileNotFoundError' for template | 'templates/cover_letter.docx' doesn't exist | Create the file - see 'cover_letter_template_guide.txt' for instructions |
-| 0 jobs found with keyword search | Site renders listings with JavaScript | Use Option 2 (direct URL) or Option 3 (manual paste) |
+| 0 jobs found with keyword search | Site renders listings with JavaScript | Say 'y' when prompted to retry with Selenium or use Option 3 (manual paste) |
 | 'PermissionError' when saving '.docx' | Output file is open in Word | Close the file in Word and press Enter - the tool retries automatically |
 | 'PermissionError' when saving '.xlsx' | Tracker file is open in Excel | Close the file in Excel and press Enter - the tool retries automatically |
+| GeckoDriver download fails | No internet on first Selenium reun | Run once with internet connected - driver is cached after first download |
 
 ---
 
@@ -373,8 +414,8 @@ These are real errors I encountered during development and testing.
 
 **What this tool can and can't do:**
 
-- **LinkedIn is not scrapeable** - LinkedIn actively blocks automated access. Use Option 3 (manual paste) for LinkedIn jobs. This is a deliberate design decision, not a bug to be fixed.
-- **JavaScript-heavy job boards** - Sites that load job listings dynamically (Indeed, Glassdoor) may return empty results with the current scraper. Option 3 works as a fallback. Selenium support is planned.
+- **LinkedIn is not scrapeable** - LinkedIn actively blocks automated access including Selenium. Use Option 3 (manual paste) for LinkedIn jobs. This is a deliberate design decision, not a bug to be fixed.
+- **JavaScript-heavy job boards** - Sites that load job listings dynamically (Indeed, Glassdoor) may return empty results with the current scraper. Option 3 works as a fallback.
 - **CSS selector fragility** - The scraper uses a prioritised list of common CSS class names. Unusual career page designs may need a custom selector added to 'candidate_selectors' in 'static_scraper.py'.
 - **AI output needs review** - The generated paragraphs are a starting point. Always read the output before submitting an application. The model can occasionally misread a job description or produce an awkward sentence.
 - **One cover letter format** - The tool is built around a single '.docx' template. Multiple template support is a future improvement.
@@ -384,7 +425,7 @@ These are real errors I encountered during development and testing.
 
 ## Future Improvements
 
-- [ ] Selenium integration for JavaScript-rendered listing and job pages
+- [✅] Selenium integration for JavaScript-rendered listing and job pages
 - [ ] Streamlit web UI - visual interface instead of CLI
 - [ ] Multiple template support - different letters for frontend vs backend roles
 - [ ] Better description parsing - handle unstructured job descriptions more reliably
