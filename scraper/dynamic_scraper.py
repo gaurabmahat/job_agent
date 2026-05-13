@@ -9,6 +9,8 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 
+from utils.spinner import Spinner
+
 TITLE_NOT_FOUND_TEXT = "Title not found."
 
 def _build_driver(headless: bool = True) -> webdriver.Firefox:
@@ -46,62 +48,67 @@ def scrape_job_page_dynamic(url: str, headless: bool = True) -> dict:
     driver = None
 
     try:
-        driver = _build_driver(headless=headless)
-        driver.get(url)
+        # Lunch browser
+        with Spinner("Launching Firefox...", style="hourglass", speed=0.5):
+            driver = _build_driver(headless=headless)
 
         #Wait up to 10 seconds fro the page body to load
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
+        with Spinner(f"Loading page...", style="dots", speed=0.1):
+            driver.get(url)
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
 
         #Extra pause for JS content to finish rendering
-        time.sleep(3)
+        with Spinner("Waiting for page content to render...", style="bar", speed=0.08):
+            time.sleep(3)
 
         #Hand the fully rendered HTML to BeautifulSoup
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+        with Spinner("Extacting job details...", style="dots", speed=0.1):
+            soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        # Extract title
-        title = TITLE_NOT_FOUND_TEXT
-        title_tag = soup.find("h1")
-        if title_tag:
-            title = title_tag.get_text(strip=True)
-        
-        #Fallback - check for h4 near redactor-styles (some job boards)
-        if not title or title == TITLE_NOT_FOUND_TEXT:
-            desc_div = soup.find(attrs={"class": "redactor-styles"})
-            if desc_div:
-                h4 = desc_div.find_previous("h4")
-                if h4:
-                    title = h4.get_text(strip=True).replace("About the job", "").strip()
-        
-        #Extract description
-        description = ""
+            # Extract title
+            title = TITLE_NOT_FOUND_TEXT
+            title_tag = soup.find("h1")
+            if title_tag:
+                title = title_tag.get_text(strip=True)
+            
+            #Fallback - check for h4 near redactor-styles (some job boards)
+            if not title or title == TITLE_NOT_FOUND_TEXT:
+                desc_div = soup.find(attrs={"class": "redactor-styles"})
+                if desc_div:
+                    h4 = desc_div.find_previous("h4")
+                    if h4:
+                        title = h4.get_text(strip=True).replace("About the job", "").strip()
+            
+            #Extract description
+            description = ""
 
-        candidate_selectors = [
-            {"class": "redactor-styles"},
-            {"class": "job-description"},
-            {"class": "description"},
-            {"class": "job-details"},
-            {"id": "job-description"},
-            {"class": "posting-description"},
-            {"class": "job-content"},
-            {"class": "vacancy-description"},
-        ]
+            candidate_selectors = [
+                {"class": "redactor-styles"},
+                {"class": "job-description"},
+                {"class": "description"},
+                {"class": "job-details"},
+                {"id": "job-description"},
+                {"class": "posting-description"},
+                {"class": "job-content"},
+                {"class": "vacancy-description"},
+            ]
 
-        for selector in candidate_selectors:
-            tag = soup.find(attrs=selector)
-            if tag:
-                description = tag.get_text(separator="\n", strip=True)
-                break
-        
-        #Fallback - grab paragraphs with meaningful content
-        if not description:
-            paragraphs = soup.find_all("p")
-            description = "\n".join(
-                p.get_text(strip=True)
-                for p in paragraphs
-                if len(p.get_text(strip=True))
-            )
+            for selector in candidate_selectors:
+                tag = soup.find(attrs=selector)
+                if tag:
+                    description = tag.get_text(separator="\n", strip=True)
+                    break
+            
+            #Fallback - grab paragraphs with meaningful content
+            if not description:
+                paragraphs = soup.find_all("p")
+                description = "\n".join(
+                    p.get_text(strip=True)
+                    for p in paragraphs
+                    if len(p.get_text(strip=True))
+                )
         
         print(f"[SELENIUM] Done. Title: '{title}")
         print(f"[SELENIUM] Description: '{len(description)} characters extracted")
@@ -121,8 +128,8 @@ def scrape_job_page_dynamic(url: str, headless: bool = True) -> dict:
     finally:
         # Always close the browser - even if something crashed
         if driver:
-            driver.quit()
-            print(f"[SELENIUM] Firefox closed.")
+            with Spinner("Closing Firefox...", style="simple", speed=0.1, done_message="[SELENIUM] Firefox closed."):
+                driver.quit()
 
 def scrape_listing_page_dynamic(
     base_url: str,
@@ -143,64 +150,71 @@ def scrape_listing_page_dynamic(
     all_jobs = []
 
     try:
-        driver = _build_driver(headless=True)
-        driver.get(base_url)
-
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.TAG_NAME, "body"))
-        )
+        # Lunch browser
+        with Spinner("Launching Firefox...", style="hourglass", speed=0.5):
+            driver = _build_driver(headless=True)
+        
+        # Load listing page
+        with Spinner("Loading job listing page...", style="dots", speed=0.1):
+            driver.get(base_url)
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
 
         # Wait for job cards to finish loading
-        time.sleep(4)
+        with Spinner("Waiting for job listings to load...", style="bar", speed=0.08):
+            time.sleep(4)
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+        # Scrape and filter
+        with Spinner("Scanning for matching jobs...", style="dots", speed=0.1):
+            soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        # Build domain root for relative URLs
-        parsed = urlparse(base_url)
-        domain_root = f"{parsed.scheme}://{parsed.netloc}"
+            # Build domain root for relative URLs
+            parsed = urlparse(base_url)
+            domain_root = f"{parsed.scheme}://{parsed.netloc}"
 
-        # Scan all links on the page
-        all_links = soup.find_all("a", href=True)
+            # Scan all links on the page
+            all_links = soup.find_all("a", href=True)
 
-        for link in all_links:
-            title = link.get_text(strip=True)
+            for link in all_links:
+                title = link.get_text(strip=True)
 
-            if not title or len(title) < 5:
-                continue
+                if not title or len(title) < 5:
+                    continue
 
-            href = link.get("href", "")
-            if not href:
-                continue
+                href = link.get("href", "")
+                if not href:
+                    continue
 
-            # Build full URL from relative path if needed
-            if href.startswith("http"):
-                full_url = href
-            elif href.startswith("/"):
-                full_url = domain_root + href
-            else:
-                continue
+                # Build full URL from relative path if needed
+                if href.startswith("http"):
+                    full_url = href
+                elif href.startswith("/"):
+                    full_url = domain_root + href
+                else:
+                    continue
 
-            # Skip duplicates
-            if any(j["url"] == full_url for j in all_jobs):
-                continue
+                # Skip duplicates
+                if any(j["url"] == full_url for j in all_jobs):
+                    continue
 
-            # Skip bloced role types
-            if is_blocked_title(title):
-                continue
+                # Skip bloced role types
+                if is_blocked_title(title):
+                    continue
 
-            # Check against all keywords
-            for keyword in keywords:
-                if title_matches_keyword(title, keyword):
-                    all_jobs.append({
-                        "title": title,
-                        "url": full_url,
-                        "keyword_matched": keyword
-                    })
-                    print(f" ✓ Matched: '{title}'")
+                # Check against all keywords
+                for keyword in keywords:
+                    if title_matches_keyword(title, keyword):
+                        all_jobs.append({
+                            "title": title,
+                            "url": full_url,
+                            "keyword_matched": keyword
+                        })
+                        print(f" ✓ Matched: '{title}'")
+                        break
+                
+                if len(all_jobs) >= max_jobs:
                     break
-            
-            if len(all_jobs) >= max_jobs:
-                break
         
         print(f"[SELENIUM] Found {len(all_jobs)} matching job(s).")
         return all_jobs
@@ -212,5 +226,5 @@ def scrape_listing_page_dynamic(
     
     finally:
         if driver:
-            driver.quit()
-            print("[SELENIUM] Firefox closed.")
+            with Spinner("Closing Firefox...", style="simple", speed=0.1, done_message="[SELENIUM] Firefox closed."):
+                driver.quit()
