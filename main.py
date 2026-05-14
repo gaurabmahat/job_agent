@@ -13,7 +13,7 @@ from scraper.listing_scraper import get_job_listings
 from scraper.static_scraper import scrape_job_page
 from ai.cover_letter_gen import generate_cover_letter_sections
 from documents.docx_handler import read_template, replace_placeholders, save_cover_letter
-from tracker.job_tracker import save_to_tracker, show_tracker_summary
+from tracker.job_tracker import save_to_tracker
 from config import (
     TEMPLATE_PATH,
     OUTPUT_DIR,
@@ -221,8 +221,6 @@ def run_full_pipeline_from_data(job_data: dict, company_name: str):
             job_role=job_title,
             job_description=job_description,
         )
-        if success:
-            show_tracker_summary()
     else:
         print("[TRACKER] Skipped - you can log it manually later.")
 

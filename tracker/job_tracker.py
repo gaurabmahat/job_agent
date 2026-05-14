@@ -131,17 +131,4 @@ def save_to_tracker(
     except Exception as e:
         print(f"\n[ERROR] Tracker save failed unexpectedly: {e}")
         return False
-
-def show_tracker_summary(tracker_path: str = TRACKER_PATH):
-    """Prints a quick summary of how many applications are logged."""
-    if not os.path.exists(tracker_path):
-        print("[TRACKER] No tracker file found yet.")
-        return
-
-    wb = load_workbook(tracker_path, read_only=True)
-    sheet = wb.active
-    # Subtract 1 for the header row
-    count = sheet.max_row - 1
-    print(f"[TRACKER] You have {count} application(s) logged in {tracker_path}")
-    wb.close()
     
