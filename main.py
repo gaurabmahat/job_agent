@@ -22,6 +22,12 @@ from config import (
     YOUR_NAME,
 )
 
+KEYWORD_SEARCH = 1
+DIRECT_URL = 2
+MANUAL_ENTRY = 3
+EXIT_PROGRAM = 4
+VALID_INPUT = [1, 2, 3, 4]
+
 def ask_required(prompt: str, field_name: str) -> str:
     """
     Keeps asking until the user types something non-empty.
@@ -97,7 +103,7 @@ def get_job_details_manually() -> dict:
     print("\n-- MANUAL JOB INPUT -----------------")
     print("--------------------------------------------------------------------------------\n")
 
-    # Both required - will keep asking if empty
+    # Both required
     job_title = ask_required("Job title (copy from the listing): ", "Job title")
     company_name = ask_required("Company name: ", "Company name")
 
@@ -140,7 +146,7 @@ def run_full_pipeline(job_url: str, company_name: str):
     run_full_pipeline_from_data(job_data, company_name)
 
 
-def run_full_pipeline_from_data(job_data: dict, company_name: str):
+def run_full_pipeline_from_data(job_data: dict, company_name: str, entry_type_manual: bool = False):
     """
     Runs steps 2-4 on already-collected job data.
     Called by both the URL scraper and the manual input option.
@@ -152,17 +158,18 @@ def run_full_pipeline_from_data(job_data: dict, company_name: str):
     print(f"  ✓ Title: {job_title}")
     print(f"  ✓ Description: {len(job_description)} characters")
 
-    # -- Let user confirm or edit the job title -------------------
     print()
-    print()
-    edited_title = input(
-        f"Job title detected as '{job_title}'.\n"
-        f"Press Enter to confirm or type a new job title: "
-    ).strip()
 
-    if edited_title:
-        job_title = edited_title
-        print(f"  ✓ Using: '{job_title}'")
+    if not entry_type_manual:
+        # -- Let user confirm or edit the job title -------------------
+        edited_title = input(
+            f"Job title detected as '{job_title}'.\n"
+            f"Press Enter to confirm or type a new job title: "
+        ).strip()
+
+        if edited_title:
+            job_title = edited_title
+            print(f"  ✓ Using: '{job_title}'")
 
     if not job_description:
         print("[WARNING] Description is empty - cover letter may be generic.")
@@ -240,10 +247,17 @@ def main():
     print("  3. Paste job details manually")
     print("  4. Exit")
 
-    choice = input("\nEnter 1, 2, 3 or 4: ").strip()
+    while True:
+        try:
+            choice = int(input("\nEnter 1, 2, 3 or 4: ").strip())
+            if choice in VALID_INPUT:
+                break
+            print("Please enter 1, 2, 3 or 4.")
+        except ValueError:
+            print("Please enter a valid number between 1 and 4.")
 
     # -- Option 1: Keyword search ----------------------------------------------
-    if choice == "1":
+    if choice == KEYWORD_SEARCH:
         print(f"\n[INFO] Searching with keywords from config.py: {JOB_KEYWORDS}")
         custom = input("Press Enter to use these, or type your own (comma separated): ").strip()
         keywords = [k.strip() for k in custom.split(",")] if custom else JOB_KEYWORDS
@@ -280,7 +294,7 @@ def main():
         run_full_pipeline(selected_job["url"], company_name)
 
     # -- Option 2: Direct URL -------------------------------
-    elif choice == "2":
+    elif choice == DIRECT_URL:
         # URL is required
         job_url = ask_required("\nPaste the job listing URL: ", "Job URL")
 
@@ -290,16 +304,17 @@ def main():
         run_full_pipeline(job_url, company_name)
     
     # -- Option 3: Enter job description manually -------------------
-    elif choice == "3":
+    elif choice == MANUAL_ENTRY:
         job_data = get_job_details_manually()
 
         run_full_pipeline_from_data(
             job_data=job_data,
-            company_name=job_data["company"]
+            company_name=job_data["company"],
+            entry_type_manual=True
         )
 
     # -- Option 4: Exit ------------------------
-    elif choice == "4":
+    elif choice == EXIT_PROGRAM:
         print("Goodbye!")
 
     else:
