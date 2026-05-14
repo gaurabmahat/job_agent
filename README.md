@@ -84,7 +84,6 @@ Press Enter to confirm or type a new job title: Software Developer
 
 Log this application to your job tracker? (y/n): y
 [TRACKER] Saved to tracker: job_tracker.xlsx
-[TRACKER] You have 3 application(s) logged in job_tracker.xlsx
 
 ```
 
@@ -383,7 +382,6 @@ At the end of every successful run you'll be asked:
 ```
 Log this application to your job tracker? (y/n): y
 [TRACKER] Saved to tracker: job_tracker.xlsx
-[TRACKER] You have 3 application(s) logged in job_tracker.xlsx
 ```
 
 'job_tracker.xlsx' is created automatically on first use and appended to on every subsequent save - it never overwrites existing entries. Open it in Excel anytime to review your full application history.
