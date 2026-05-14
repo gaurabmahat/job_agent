@@ -252,9 +252,9 @@ def main():
             choice = int(input("\nEnter 1, 2, 3 or 4: ").strip())
             if choice in VALID_INPUT:
                 break
-            print("Please enter 1, 2, 3 or 4.")
+            print("Invalid input. Please enter 1, 2, 3 or 4.")
         except ValueError:
-            print("Please enter a valid number between 1 and 4.")
+            print("Invalid input. Please enter a valid number between 1, 2, 3 or 4.")
 
     # -- Option 1: Keyword search ----------------------------------------------
     if choice == KEYWORD_SEARCH:
